@@ -68,6 +68,18 @@ gunpass-location/
 2. `plusCode` フィールドに Plus Code を記入し `python3 scripts/geocode.py` を実行すると緯度経度が更新される
 3. 自治体境界を更新する場合は `scripts/build_municipalities.py` → `scripts/build_mask.py` の順に実行する
 
+## バージョン管理
+
+semver（`0.x.x`）に準拠する。
+
+- `0.x.0` — 機能追加・UI の大きな変更
+- `0.x.x` — バグ修正・小さな調整
+
+リリース手順:
+1. `package.json` と `index.html` の `#version` を更新する
+2. `dev` → `main` にマージする
+3. `main` で git tag を打つ: `git tag v0.x.x && git push origin v0.x.x`
+
 ## メンテナンスルール
 
 - 機能を追加・変更したら、このファイル（`AGENT.md`）と `README.md` を必ず更新する
