@@ -289,6 +289,7 @@
       "region": "keno",
       "municipality": "前橋市",
       "name": "群馬県庁",
+      "optional": true,
       "address": "前橋市大手町1-1-1",
       "plusCode": "93R6+74 Maebashi, Gunma",
       "lat": 36.390687,

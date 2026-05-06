@@ -37,7 +37,7 @@
   }
 
   // 内側の緑リング／塗りつぶし
-  function markerStyle(isStamped) {
+  function markerStyle(isStamped, isOptional) {
     return {
       radius: 7,
       fillColor: MARKER_FILL,
@@ -45,6 +45,7 @@
       color: MARKER_RING,
       weight: 2.5,
       opacity: 1,
+      dashArray: isOptional ? '4 3' : null,
     };
   }
 
@@ -66,6 +67,7 @@
       encodeURIComponent(loc.name + ' ' + loc.address);
     return `<div class="location-popup">
       <h3>${loc.name}<span class="muni-inline">（${loc.municipality}・${regionName}地区）</span></h3>
+      ${loc.optional ? '<p class="optional-notice">コンプリート対象外</p>' : ''}
       <div class="popup-actions">
         <a class="action-btn maps-btn" href="${mapsUrl}" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/></svg>
@@ -86,38 +88,7 @@
     </div>`;
   }
 
-  function makeMuniPopupContent(name, regions, locations, stamped) {
-    const locs = locations.filter(l => l.municipality === name);
-    const regionName = locs.length ? regions[locs[0].region] : '';
-    const COPY_ICON = '<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" fill="currentColor"/></svg>';
-    const locItems = locs.map(l => {
-      const isStamped = stamped.has(String(l.id));
-      const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' +
-        encodeURIComponent(l.name + ' ' + l.address);
-      return `<div class="muni-loc-item">
-        <div class="muni-loc-name">${l.name}</div>
-        <div class="popup-actions">
-          <a class="action-btn maps-btn" href="${mapsUrl}" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/></svg>
-            <span>Google Maps</span>
-          </a>
-          <button class="action-btn stamp-btn${isStamped ? ' stamped' : ''}" data-location-id="${l.id}">
-            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></svg>
-            <span class="btn-label">${isStamped ? '記録済み' : '記録する'}</span>
-          </button>
-        </div>
-        <p class="detail-address">
-          <span>${l.address}</span>
-          <button class="copy-btn" data-copy="${l.address}" title="住所をコピー">${COPY_ICON}</button>
-        </p>
-      </div>`;
-    }).join('');
-    return `<div class="location-popup">
-      <h3>${name}<span class="muni-inline">（${regionName}地区）</span></h3>
-      ${locItems}
-      <p class="popup-notice">情報は2026年5月時点です。最新情報は<a href="https://gunpass.pref.gunma.jp/location/" target="_blank" rel="noopener">公式ページ</a>をご確認ください。</p>
-    </div>`;
-  }
+
 
   function attachStampBtn(popup, stamped, locId, circleEntry, geojsonLayer, updateProgress) {
     const btn = popup.getElement().querySelector('.stamp-btn');
@@ -134,7 +105,7 @@
         btn.classList.add('stamped');
       }
       saveStamped(stamped);
-      circleEntry.circle.setStyle(markerStyle(stamped.has(String(locId))));
+      circleEntry.circle.setStyle(markerStyle(stamped.has(String(locId)), circleEntry.optional));
       if (geojsonLayer) geojsonLayer.resetStyle();
       updateProgress();
     });
@@ -148,13 +119,13 @@
     const stamped = loadStamped();
 
     function isAnyStamped(municipality) {
-      return locations.some(l => l.municipality === municipality && stamped.has(String(l.id)));
+      return locations.some(l => !l.optional && l.municipality === municipality && stamped.has(String(l.id)));
     }
 
     function stampedMuniCount() {
       const munis = new Set();
       for (const loc of locations) {
-        if (stamped.has(String(loc.id))) munis.add(loc.municipality);
+        if (!loc.optional && stamped.has(String(loc.id))) munis.add(loc.municipality);
       }
       return munis.size;
     }
@@ -262,43 +233,6 @@
         });
         layer.on('mouseover', e => e.target.setStyle({ weight: 4 }));
         layer.on('mouseout', () => geojsonLayer.resetStyle(layer));
-        layer.bindPopup(
-          () => makeMuniPopupContent(name, regions, locations, stamped),
-          { maxWidth: 280, minWidth: 240 }
-        );
-        layer.on('popupopen', () => {
-          const el = layer.getPopup().getElement();
-          el.querySelectorAll('.stamp-btn').forEach(btn => {
-            const locId = btn.dataset.locationId;
-            btn.addEventListener('click', () => {
-              const label = btn.querySelector('.btn-label');
-              if (stamped.has(String(locId))) {
-                stamped.delete(String(locId));
-                if (label) label.textContent = '記録する';
-                btn.classList.remove('stamped');
-              } else {
-                stamped.add(String(locId));
-                if (label) label.textContent = '記録済み';
-                btn.classList.add('stamped');
-              }
-              saveStamped(stamped);
-              const entry = circleByLocId[locId];
-              if (entry) entry.circle.setStyle(markerStyle(stamped.has(String(locId))));
-              if (geojsonLayer) geojsonLayer.resetStyle();
-              updateProgress();
-            });
-          });
-          const COPY_ICON = '<svg viewBox="0 0 24 24" width="13" height="13"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" fill="currentColor"/></svg>';
-          const CHECK_ICON = '<svg viewBox="0 0 24 24" width="13" height="13"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></svg>';
-          el.querySelectorAll('.copy-btn').forEach(copyBtn => {
-            copyBtn.addEventListener('click', () => {
-              navigator.clipboard.writeText(copyBtn.dataset.copy).then(() => {
-                copyBtn.innerHTML = CHECK_ICON;
-                setTimeout(() => { copyBtn.innerHTML = COPY_ICON; }, 2000);
-              });
-            });
-          });
-        });
       },
     }).addTo(map);
 
@@ -316,16 +250,16 @@
       // 内側の緑リング／塗りつぶし（インタラクティブ）
       const circle = L.circleMarker(
         [loc.lat, loc.lng],
-        markerStyle(stamped.has(String(loc.id)))
+        markerStyle(stamped.has(String(loc.id)), loc.optional)
       ).addTo(map);
 
       circle.on('click', () => { markerClicked = true; });
-      circle.bindTooltip(loc.name, { direction: 'top', offset: [0, -10] });
+      circle.bindTooltip(loc.name, { permanent: true, direction: 'top', offset: [0, -10], className: 'marker-label' });
       circle.bindPopup(
         () => makeMarkerPopupContent(loc, regions, stamped),
         { maxWidth: 250, minWidth: 210 }
       );
-      circleByLocId[loc.id] = { circle };
+      circleByLocId[loc.id] = { circle, optional: loc.optional };
       circle.on('popupopen', () => {
         attachStampBtn(circle.getPopup(), stamped, loc.id, circleByLocId[loc.id], geojsonLayer, updateProgress);
         const copyBtn = circle.getPopup().getElement().querySelector('.copy-btn');
@@ -342,12 +276,22 @@
       });
     });
 
+    const LABEL_ZOOM = 11;
+    function updateMarkerLabels() {
+      const show = map.getZoom() >= LABEL_ZOOM;
+      Object.values(circleByLocId).forEach(({ circle }) => {
+        show ? circle.openTooltip() : circle.closeTooltip();
+      });
+    }
+    map.on('zoomend', updateMarkerLabels);
+    updateMarkerLabels();
+
     document.getElementById('btn-reset').addEventListener('click', () => {
       if (!confirm('全ての記録をリセットしますか?')) return;
       stamped.clear();
       saveStamped(stamped);
-      Object.values(circleByLocId).forEach(({ circle }) => {
-        circle.setStyle(markerStyle(false));
+      Object.values(circleByLocId).forEach(({ circle, optional }) => {
+        circle.setStyle(markerStyle(false, optional));
       });
       if (geojsonLayer) geojsonLayer.resetStyle();
       updateProgress();

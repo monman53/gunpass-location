@@ -3,6 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "npx serve ."
+    "dev": "npx browser-sync start --server --files '*.html,*.css,*.js,*.json' --port 3000 --no-open"
   }
 }
