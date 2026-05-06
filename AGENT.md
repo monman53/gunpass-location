@@ -73,4 +73,4 @@ gunpass-location/
 - 機能を追加・変更したら、このファイル（`AGENT.md`）と `README.md` を必ず更新する
 - 作業は `dev` ブランチで行い、`main` へのマージ時のみ GitHub Pages にデプロイされる
   - 普段: `dev` ブランチで作業・push
-  - リリース: `git checkout main && git merge dev && git push && git checkout dev`
+  - リリース: `git checkout main && git merge --no-ff dev && git push && git checkout dev`
