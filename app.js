@@ -6,7 +6,7 @@
 
   function loadStamped() {
     try {
-      return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+      return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]').map(String));
     } catch {
       return new Set();
     }
@@ -60,7 +60,7 @@
 
   function makeMarkerPopupContent(loc, regions, stamped) {
     const regionName = regions[loc.region];
-    const isStamped = stamped.has(loc.id);
+    const isStamped = stamped.has(String(loc.id));
     const mapsUrl =
       'https://www.google.com/maps/search/?api=1&query=' +
       encodeURIComponent(loc.name + ' ' + loc.address);
@@ -91,7 +91,7 @@
     const regionName = locs.length ? regions[locs[0].region] : '';
     const COPY_ICON = '<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" fill="currentColor"/></svg>';
     const locItems = locs.map(l => {
-      const isStamped = stamped.has(l.id);
+      const isStamped = stamped.has(String(l.id));
       const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' +
         encodeURIComponent(l.name + ' ' + l.address);
       return `<div class="muni-loc-item">
@@ -124,17 +124,17 @@
     if (!btn) return;
     btn.addEventListener('click', () => {
       const label = btn.querySelector('.btn-label');
-      if (stamped.has(locId)) {
-        stamped.delete(locId);
+      if (stamped.has(String(locId))) {
+        stamped.delete(String(locId));
         if (label) label.textContent = '記録する';
         btn.classList.remove('stamped');
       } else {
-        stamped.add(locId);
+        stamped.add(String(locId));
         if (label) label.textContent = '記録済み';
         btn.classList.add('stamped');
       }
       saveStamped(stamped);
-      circleEntry.circle.setStyle(markerStyle(stamped.has(locId)));
+      circleEntry.circle.setStyle(markerStyle(stamped.has(String(locId))));
       if (geojsonLayer) geojsonLayer.resetStyle();
       updateProgress();
     });
@@ -148,13 +148,13 @@
     const stamped = loadStamped();
 
     function isAnyStamped(municipality) {
-      return locations.some(l => l.municipality === municipality && stamped.has(l.id));
+      return locations.some(l => l.municipality === municipality && stamped.has(String(l.id)));
     }
 
     function stampedMuniCount() {
       const munis = new Set();
       for (const loc of locations) {
-        if (stamped.has(loc.id)) munis.add(loc.municipality);
+        if (stamped.has(String(loc.id))) munis.add(loc.municipality);
       }
       return munis.size;
     }
@@ -272,18 +272,18 @@
             const locId = btn.dataset.locationId;
             btn.addEventListener('click', () => {
               const label = btn.querySelector('.btn-label');
-              if (stamped.has(locId)) {
-                stamped.delete(locId);
+              if (stamped.has(String(locId))) {
+                stamped.delete(String(locId));
                 if (label) label.textContent = '記録する';
                 btn.classList.remove('stamped');
               } else {
-                stamped.add(locId);
+                stamped.add(String(locId));
                 if (label) label.textContent = '記録済み';
                 btn.classList.add('stamped');
               }
               saveStamped(stamped);
               const entry = circleByLocId[locId];
-              if (entry) entry.circle.setStyle(markerStyle(stamped.has(locId)));
+              if (entry) entry.circle.setStyle(markerStyle(stamped.has(String(locId))));
               if (geojsonLayer) geojsonLayer.resetStyle();
               updateProgress();
             });
@@ -316,7 +316,7 @@
       // 内側の緑リング／塗りつぶし（インタラクティブ）
       const circle = L.circleMarker(
         [loc.lat, loc.lng],
-        markerStyle(stamped.has(loc.id))
+        markerStyle(stamped.has(String(loc.id)))
       ).addTo(map);
 
       circle.on('click', () => { markerClicked = true; });
