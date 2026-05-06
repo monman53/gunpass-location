@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GUNMA PASSPORT スタンプ設置場所マップ</title>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-E9ZG1KHTVT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-E9ZG1KHTVT');
+  </script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="map"></div>
+  <div id="panel">
+    <h1>GUNMA PASSPORT スタンプマップ</h1>
+    <p id="unofficial">非公式</p>
+    <div id="progress">収集済み: <strong>0&thinsp;/&thinsp;35 自治体</strong></div>
+    <div id="panel-footer">
+      <a href="https://gunpass.pref.gunma.jp/location/" target="_blank" rel="noopener">公式設置場所一覧</a>
+      <span id="data-date">2026年5月時点・最新情報は公式ページをご確認ください</span>
+      <button id="btn-reset">記録をリセット</button>
+    </div>
+  </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

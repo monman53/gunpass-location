@@ -1,0 +1,7 @@
+{
+  "name": "gunpass-location",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve ."
+  }
+}

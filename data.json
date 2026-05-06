@@ -1,0 +1,488 @@
+{
+  "regions": {
+    "agatsuma": "吾妻",
+    "tone": "利根沼田",
+    "seibu": "西部",
+    "keno": "県央",
+    "tobu": "東部"
+  },
+  "municipalities": {
+    "中之条町": "hsl(339, 70%, 48%)",
+    "長野原町": "hsl(206, 70%, 48%)",
+    "嬬恋村": "hsl(41, 70%, 48%)",
+    "草津町": "hsl(113, 70%, 48%)",
+    "東吾妻町": "hsl(82, 70%, 48%)",
+    "高山村": "hsl(257, 70%, 48%)",
+    "沼田市": "hsl(0, 70%, 48%)",
+    "川場村": "hsl(62, 70%, 48%)",
+    "みなかみ町": "hsl(165, 70%, 48%)",
+    "片品村": "hsl(237, 70%, 48%)",
+    "昭和村": "hsl(247, 70%, 48%)",
+    "高崎市": "hsl(350, 70%, 48%)",
+    "藤岡市": "hsl(185, 70%, 48%)",
+    "富岡市": "hsl(216, 70%, 48%)",
+    "安中市": "hsl(288, 70%, 48%)",
+    "神流町": "hsl(278, 70%, 48%)",
+    "下仁田町": "hsl(10, 70%, 48%)",
+    "上野村": "hsl(51, 70%, 48%)",
+    "南牧村": "hsl(144, 70%, 48%)",
+    "甘楽町": "hsl(103, 70%, 48%)",
+    "前橋市": "hsl(267, 70%, 48%)",
+    "伊勢崎市": "hsl(21, 70%, 48%)",
+    "渋川市": "hsl(175, 70%, 48%)",
+    "榛東村": "hsl(72, 70%, 48%)",
+    "吉岡町": "hsl(329, 70%, 48%)",
+    "玉村町": "hsl(93, 70%, 48%)",
+    "太田市": "hsl(309, 70%, 48%)",
+    "館林市": "hsl(31, 70%, 48%)",
+    "みどり市": "hsl(226, 70%, 48%)",
+    "桐生市": "hsl(134, 70%, 48%)",
+    "板倉町": "hsl(319, 70%, 48%)",
+    "明和町": "hsl(154, 70%, 48%)",
+    "千代田町": "hsl(298, 70%, 48%)",
+    "大泉町": "hsl(195, 70%, 48%)",
+    "邑楽町": "hsl(123, 70%, 48%)"
+  },
+  "locations": [
+    {
+      "id": 1,
+      "region": "agatsuma",
+      "municipality": "中之条町",
+      "name": "道の駅 六合",
+      "address": "吾妻郡中之条町大字小雨22",
+      "plusCode": "JJ5Q+39 Nakanojo, Gunma",
+      "lat": 36.607687,
+      "lng": 138.638438
+    },
+    {
+      "id": 2,
+      "region": "agatsuma",
+      "municipality": "中之条町",
+      "name": "道の駅 霊山たけやま",
+      "address": "吾妻郡中之条町大字五反田222-1",
+      "plusCode": "JR5H+JX Nakanojo, Gunma",
+      "lat": 36.609063,
+      "lng": 138.829937
+    },
+    {
+      "id": 3,
+      "region": "agatsuma",
+      "municipality": "長野原町",
+      "name": "道の駅 八ッ場ふるさと館",
+      "address": "吾妻郡長野原町大字林1567-4",
+      "plusCode": "GMXM+2M Naganohara, Gunma",
+      "lat": 36.547562,
+      "lng": 138.684188
+    },
+    {
+      "id": 4,
+      "region": "agatsuma",
+      "municipality": "嬬恋村",
+      "name": "嬬恋村観光案内所",
+      "address": "吾妻郡嬬恋村鎌原710-136",
+      "plusCode": "GHJ2+J4 Tsumagoi, Gunma",
+      "lat": 36.531562,
+      "lng": 138.550313
+    },
+    {
+      "id": 5,
+      "region": "agatsuma",
+      "municipality": "草津町",
+      "name": "道の駅 草津運動茶屋公園",
+      "address": "吾妻郡草津町大字草津2-1",
+      "plusCode": "JH7R+W4 Kusatsu, Gunma",
+      "lat": 36.614812,
+      "lng": 138.590312
+    },
+    {
+      "id": 6,
+      "region": "agatsuma",
+      "municipality": "東吾妻町",
+      "name": "道の駅 あがつま峡",
+      "address": "吾妻郡東吾妻町三島6441",
+      "plusCode": "HP9P+R6 Higashiagatsuma, Gunma",
+      "lat": 36.569562,
+      "lng": 138.735563
+    },
+    {
+      "id": 7,
+      "region": "agatsuma",
+      "municipality": "高山村",
+      "name": "道の駅 中山盆地",
+      "address": "吾妻郡高山村大字中山2357-1",
+      "plusCode": "JXF4+52 Takayama, Gunma",
+      "lat": 36.622937,
+      "lng": 138.955062
+    },
+    {
+      "id": 8,
+      "region": "tone",
+      "municipality": "沼田市",
+      "name": "道の駅 白沢",
+      "address": "沼田市白沢町平出1297",
+      "plusCode": "M46C+V4 Numata, Gunma",
+      "lat": 36.662188,
+      "lng": 139.120313
+    },
+    {
+      "id": 9,
+      "region": "tone",
+      "municipality": "川場村",
+      "name": "川場村観光協会",
+      "address": "利根郡川場村大字萩室385",
+      "plusCode": "M4P5+V5 Kawaba, Gunma",
+      "lat": 36.687188,
+      "lng": 139.107937
+    },
+    {
+      "id": 10,
+      "region": "tone",
+      "municipality": "みなかみ町",
+      "name": "道の駅 みなかみ水紀行館",
+      "address": "利根郡みなかみ町湯原1681-1",
+      "plusCode": "QX79+W8 Minakami, Gunma",
+      "lat": 36.764813,
+      "lng": 138.968313
+    },
+    {
+      "id": 11,
+      "region": "tone",
+      "municipality": "みなかみ町",
+      "name": "道の駅 月夜野矢瀬親水公園",
+      "address": "利根郡みなかみ町月夜野2936",
+      "plusCode": "MXXJ+3F Minakami, Gunma",
+      "lat": 36.697688,
+      "lng": 138.981187
+    },
+    {
+      "id": 12,
+      "region": "tone",
+      "municipality": "みなかみ町",
+      "name": "道の駅 たくみの里",
+      "address": "利根郡みなかみ町須川847",
+      "plusCode": "MWW5+C8 Minakami, Gunma",
+      "lat": 36.696062,
+      "lng": 138.908313
+    },
+    {
+      "id": 13,
+      "region": "tone",
+      "municipality": "片品村",
+      "name": "道の駅 尾瀬かたしな",
+      "address": "利根郡片品村大字鎌田3967-1",
+      "plusCode": "Q6FG+48 Katashina, Gunma",
+      "lat": 36.772813,
+      "lng": 139.225813
+    },
+    {
+      "id": 14,
+      "region": "tone",
+      "municipality": "昭和村",
+      "name": "道の駅 あぐりーむ昭和",
+      "address": "利根郡昭和村森下2406-2",
+      "plusCode": "J379+4M Showa, Gunma",
+      "lat": 36.612813,
+      "lng": 139.069187
+    },
+    {
+      "id": 15,
+      "region": "seibu",
+      "municipality": "高崎市",
+      "name": "道の駅 くらぶち小栗の里",
+      "address": "高崎市倉渕町三ノ倉296-1",
+      "plusCode": "CQFV+P7 Takasaki, Gunma",
+      "lat": 36.424312,
+      "lng": 138.793187
+    },
+    {
+      "id": 16,
+      "region": "seibu",
+      "municipality": "藤岡市",
+      "name": "道の駅 上州おにし",
+      "address": "藤岡市譲原1089-2",
+      "plusCode": "42VR+65 Fujioka, Gunma",
+      "lat": 36.143062,
+      "lng": 139.040437
+    },
+    {
+      "id": 17,
+      "region": "seibu",
+      "municipality": "藤岡市",
+      "name": "道の駅 ららん藤岡",
+      "address": "藤岡市中1131-8",
+      "plusCode": "73CC+XR Fujioka, Gunma",
+      "lat": 36.272437,
+      "lng": 139.072063
+    },
+    {
+      "id": 18,
+      "region": "seibu",
+      "municipality": "富岡市",
+      "name": "道の駅 みょうぎ",
+      "address": "富岡市妙義町岳322-7",
+      "plusCode": "7QX8+P9 Tomioka, Gunma",
+      "lat": 36.299312,
+      "lng": 138.765938
+    },
+    {
+      "id": 19,
+      "region": "seibu",
+      "municipality": "安中市",
+      "name": "安中市観光機構",
+      "address": "安中市松井田町横川441-6",
+      "plusCode": "8PPM+QM Annaka, Gunma",
+      "lat": 36.336938,
+      "lng": 138.734188
+    },
+    {
+      "id": 20,
+      "region": "seibu",
+      "municipality": "神流町",
+      "name": "道の駅 万葉の里",
+      "address": "多野郡神流町大字黒田742-1",
+      "plusCode": "4V5X+V8 Kanna, Gunma",
+      "lat": 36.109687,
+      "lng": 138.898312
+    },
+    {
+      "id": 21,
+      "region": "seibu",
+      "municipality": "下仁田町",
+      "name": "道の駅 しもにた",
+      "address": "甘楽郡下仁田町大字馬山3766-11",
+      "plusCode": "6RF2+GR Shimonita, Gunma",
+      "lat": 36.223813,
+      "lng": 138.802062
+    },
+    {
+      "id": 22,
+      "region": "seibu",
+      "municipality": "上野村",
+      "name": "道の駅 上野",
+      "address": "多野郡上野村大字勝山甲131",
+      "plusCode": "3QHM+VF Ueno, Gunma",
+      "lat": 36.079687,
+      "lng": 138.783687
+    },
+    {
+      "id": 23,
+      "region": "seibu",
+      "municipality": "南牧村",
+      "name": "道の駅 オアシスなんもく",
+      "address": "甘楽郡南牧村大字千原3-1",
+      "plusCode": "5PHR+7J Nammoku, Gunma",
+      "lat": 36.178187,
+      "lng": 138.741562
+    },
+    {
+      "id": 24,
+      "region": "seibu",
+      "municipality": "甘楽町",
+      "name": "道の駅 甘楽",
+      "address": "甘楽郡甘楽町大字小幡444-1",
+      "plusCode": "6WM8+FP Kanra, Gunma",
+      "lat": 36.233688,
+      "lng": 138.916812
+    },
+    {
+      "id": 25,
+      "region": "keno",
+      "municipality": "前橋市",
+      "name": "群馬県庁",
+      "address": "前橋市大手町1-1-1",
+      "plusCode": "93R6+74 Maebashi, Gunma",
+      "lat": 36.390687,
+      "lng": 139.060313
+    },
+    {
+      "id": 26,
+      "region": "keno",
+      "municipality": "前橋市",
+      "name": "道の駅 まえばし赤城",
+      "address": "前橋市田口町36",
+      "plusCode": "C3Q3+V6 Maebashi, Gunma",
+      "lat": 36.439687,
+      "lng": 139.053063
+    },
+    {
+      "id": 27,
+      "region": "keno",
+      "municipality": "前橋市",
+      "name": "道の駅 ぐりーんふらわー牧場・大胡",
+      "address": "前橋市滝窪町1369-1",
+      "plusCode": "F45P+JH Maebashi, Gunma",
+      "lat": 36.459063,
+      "lng": 139.136437
+    },
+    {
+      "id": 28,
+      "region": "keno",
+      "municipality": "前橋市",
+      "name": "道の駅 赤城の恵",
+      "address": "前橋市荻窪町437-11",
+      "plusCode": "C4FH+GC Maebashi, Gunma",
+      "lat": 36.423812,
+      "lng": 139.128562
+    },
+    {
+      "id": 29,
+      "region": "keno",
+      "municipality": "前橋市",
+      "name": "道の駅 ふじみ",
+      "address": "前橋市富士見町石井1569-1",
+      "plusCode": "F39V+PM Maebashi, Gunma",
+      "lat": 36.469313,
+      "lng": 139.094187
+    },
+    {
+      "id": 30,
+      "region": "keno",
+      "municipality": "伊勢崎市",
+      "name": "田島弥平旧宅",
+      "address": "伊勢崎市境島村1968番地40",
+      "plusCode": "66WQ+MJ Isesaki, Gunma",
+      "lat": 36.246688,
+      "lng": 139.239062
+    },
+    {
+      "id": 31,
+      "region": "keno",
+      "municipality": "渋川市",
+      "name": "道の駅 おのこ",
+      "address": "渋川市小野子1980",
+      "plusCode": "GXX3+64 Shibukawa, Gunma",
+      "lat": 36.548063,
+      "lng": 138.952812
+    },
+    {
+      "id": 32,
+      "region": "keno",
+      "municipality": "渋川市",
+      "name": "道の駅 こもち",
+      "address": "渋川市白井2318-1",
+      "plusCode": "G278+WP Shibukawa, Gunma",
+      "lat": 36.514813,
+      "lng": 139.016813
+    },
+    {
+      "id": 33,
+      "region": "keno",
+      "municipality": "榛東村",
+      "name": "しんとうふるさと公園",
+      "address": "北群馬郡榛東村山子田1920-1",
+      "plusCode": "CXX9+JJ Shinto, Gunma",
+      "lat": 36.449062,
+      "lng": 138.969063
+    },
+    {
+      "id": 34,
+      "region": "keno",
+      "municipality": "吉岡町",
+      "name": "道の駅 よしおか温泉",
+      "address": "北群馬郡吉岡町大字漆原2004",
+      "plusCode": "C2RM+MW Yoshioka, Gunma",
+      "lat": 36.441688,
+      "lng": 139.034812
+    },
+    {
+      "id": 35,
+      "region": "keno",
+      "municipality": "玉村町",
+      "name": "道の駅 玉村宿",
+      "address": "佐波郡玉村町大字上新田604-1",
+      "plusCode": "835V+7Q Tamamura, Gunma",
+      "lat": 36.308187,
+      "lng": 139.094438
+    },
+    {
+      "id": 36,
+      "region": "tobu",
+      "municipality": "太田市",
+      "name": "道の駅 おおた",
+      "address": "太田市粕川町701-1",
+      "plusCode": "777W+R9 Ota, Gunma",
+      "lat": 36.264562,
+      "lng": 139.295937
+    },
+    {
+      "id": 37,
+      "region": "tobu",
+      "municipality": "館林市",
+      "name": "つつじが岡ふれあいセンター",
+      "address": "館林市花山町3176",
+      "plusCode": "6HR2+MH Tatebayashi, Gunma",
+      "lat": 36.241687,
+      "lng": 139.551438
+    },
+    {
+      "id": 38,
+      "region": "tobu",
+      "municipality": "みどり市",
+      "name": "みどり市観光協会",
+      "address": "みどり市大間々町大間々1034-5",
+      "plusCode": "C7PF+6W Midori, Gunma",
+      "lat": 36.435562,
+      "lng": 139.274812
+    },
+    {
+      "id": 39,
+      "region": "tobu",
+      "municipality": "桐生市",
+      "name": "道の駅 くろほね・やまびこ",
+      "address": "桐生市黒保根町下田沢91-4",
+      "plusCode": "F7RC+FM Kiryu, Gunma",
+      "lat": 36.491187,
+      "lng": 139.271687
+    },
+    {
+      "id": 40,
+      "region": "tobu",
+      "municipality": "板倉町",
+      "name": "わたらせ自然館",
+      "address": "邑楽郡板倉町大字海老瀬4663-1",
+      "plusCode": "6MF2+66 Itakura, Gunma",
+      "lat": 36.223062,
+      "lng": 139.650562
+    },
+    {
+      "id": 41,
+      "region": "tobu",
+      "municipality": "明和町",
+      "name": "駅前プラザ「メイちゃん家」",
+      "address": "邑楽郡明和町中谷328番地10",
+      "plusCode": "6G5G+CG Meiwa, Gunma",
+      "lat": 36.208562,
+      "lng": 139.526313
+    },
+    {
+      "id": 42,
+      "region": "tobu",
+      "municipality": "千代田町",
+      "name": "光恩寺長屋門",
+      "address": "邑楽郡千代田町赤岩1041",
+      "plusCode": "6C5Q+7M Chiyoda, Gunma",
+      "lat": 36.208188,
+      "lng": 139.439188
+    },
+    {
+      "id": 43,
+      "region": "tobu",
+      "municipality": "大泉町",
+      "name": "大泉町観光協会",
+      "address": "邑楽郡大泉町西小泉4-11-22",
+      "plusCode": "7C56+7F Oizumi, Gunma",
+      "lat": 36.258187,
+      "lng": 139.411187
+    },
+    {
+      "id": 44,
+      "region": "tobu",
+      "municipality": "邑楽町",
+      "name": "シンボルタワー未来MiRAi",
+      "address": "邑楽郡邑楽町中野2639-1",
+      "plusCode": "7F36+6X Ora, Gunma",
+      "lat": 36.253062,
+      "lng": 139.462438
+    }
+  ]
+}
