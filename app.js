@@ -22,31 +22,23 @@
   const MARKER_FILL  = 'hsl(4, 92%, 52%)';
   const MARKER_RING  = 'hsl(4, 92%, 38%)';
 
-  // 外側の白リング（常に表示・非インタラクティブ）
-  function markerOuterStyle() {
-    return {
-      radius: 9,
-      fillColor: '#fff',
-      fillOpacity: 1,
-      color: '#fff',
-      weight: 2.5,
-      opacity: 1,
-      interactive: false,
-      bubblingMouseEvents: false,
-    };
-  }
-
-  // 内側の緑リング／塗りつぶし
-  function markerStyle(isStamped, isOptional) {
-    return {
-      radius: 7,
-      fillColor: MARKER_FILL,
-      fillOpacity: isStamped ? 0.9 : 0,
-      color: MARKER_RING,
-      weight: 2.5,
-      opacity: 1,
-      dashArray: isOptional ? '4 3' : null,
-    };
+  function stampIcon(isStamped, isOptional) {
+    const fill = isStamped ? MARKER_FILL : 'white';
+    const fillOpacity = isStamped ? '0.92' : '0.9';
+    const dash = isOptional ? 'stroke-dasharray="4 3"' : '';
+    // 丸い持ち手(cx=12,cy=9,r=7)の左右接線点: x=8.5 or 15.5 → y=9+sqrt(49-12.25)≈15
+    const svg = `<svg width="24" height="30" viewBox="0 0 24 30" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8.5,15 A7,7,0,1,1,15.5,15 L15.5,22 L22,22 L22,29 L2,29 L2,22 L8.5,22 Z"
+            fill="${fill}" fill-opacity="${fillOpacity}" stroke="${MARKER_RING}" stroke-width="2" stroke-linejoin="round" ${dash}/>
+    </svg>`;
+    return L.divIcon({
+      html: svg,
+      className: '',
+      iconSize: [24, 30],
+      iconAnchor: [12, 29],
+      tooltipAnchor: [0, -30],
+      popupAnchor: [0, -15],
+    });
   }
 
   function polygonStyle(isStamped) {
@@ -105,7 +97,7 @@
         btn.classList.add('stamped');
       }
       saveStamped(stamped);
-      circleEntry.circle.setStyle(markerStyle(stamped.has(String(locId)), circleEntry.optional));
+      circleEntry.marker.setIcon(stampIcon(stamped.has(String(locId)), circleEntry.optional));
       if (geojsonLayer) geojsonLayer.resetStyle();
       updateProgress();
     });
@@ -244,25 +236,21 @@
 
     // スタンプ設置場所マーカー（ポリゴンより前面）
     locations.forEach(loc => {
-      // 外側の白リング（装飾用・非インタラクティブ）
-      L.circleMarker([loc.lat, loc.lng], markerOuterStyle()).addTo(map);
-
-      // 内側の緑リング／塗りつぶし（インタラクティブ）
-      const circle = L.circleMarker(
+      const marker = L.marker(
         [loc.lat, loc.lng],
-        markerStyle(stamped.has(String(loc.id)), loc.optional)
+        { icon: stampIcon(stamped.has(String(loc.id)), loc.optional) }
       ).addTo(map);
 
-      circle.on('click', () => { markerClicked = true; });
-      circle.bindTooltip(loc.name, { permanent: true, direction: 'top', offset: [0, -10], className: 'marker-label' });
-      circle.bindPopup(
+      marker.on('click', () => { markerClicked = true; });
+      marker.bindTooltip(loc.name, { permanent: true, direction: 'top', className: 'marker-label' });
+      marker.bindPopup(
         () => makeMarkerPopupContent(loc, regions, stamped),
         { maxWidth: 250, minWidth: 210 }
       );
-      circleByLocId[loc.id] = { circle, optional: loc.optional };
-      circle.on('popupopen', () => {
-        attachStampBtn(circle.getPopup(), stamped, loc.id, circleByLocId[loc.id], geojsonLayer, updateProgress);
-        const copyBtn = circle.getPopup().getElement().querySelector('.copy-btn');
+      circleByLocId[loc.id] = { marker, optional: loc.optional };
+      marker.on('popupopen', () => {
+        attachStampBtn(marker.getPopup(), stamped, loc.id, circleByLocId[loc.id], geojsonLayer, updateProgress);
+        const copyBtn = marker.getPopup().getElement().querySelector('.copy-btn');
         if (copyBtn) {
           copyBtn.addEventListener('click', () => {
             navigator.clipboard.writeText(copyBtn.dataset.copy).then(() => {
@@ -279,8 +267,8 @@
     const LABEL_ZOOM = 11;
     function updateMarkerLabels() {
       const show = map.getZoom() >= LABEL_ZOOM;
-      Object.values(circleByLocId).forEach(({ circle }) => {
-        show ? circle.openTooltip() : circle.closeTooltip();
+      Object.values(circleByLocId).forEach(({ marker }) => {
+        show ? marker.openTooltip() : marker.closeTooltip();
       });
     }
     map.on('zoomend', updateMarkerLabels);
@@ -290,8 +278,8 @@
       if (!confirm('全ての記録をリセットしますか?')) return;
       stamped.clear();
       saveStamped(stamped);
-      Object.values(circleByLocId).forEach(({ circle, optional }) => {
-        circle.setStyle(markerStyle(false, optional));
+      Object.values(circleByLocId).forEach(({ marker, optional }) => {
+        marker.setIcon(stampIcon(false, optional));
       });
       if (geojsonLayer) geojsonLayer.resetStyle();
       updateProgress();
