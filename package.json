@@ -1,6 +1,6 @@
 {
   "name": "gunpass-location",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "npx browser-sync start --server --files '*.html,*.css,*.js,*.json' --port 3000 --no-open --no-ghost-mode",
