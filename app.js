@@ -25,7 +25,6 @@
   const GREEN_POLY_STAMPED  = 'hsl(142, 72%, 30%)';
   const GREEN_POLY_UNSTAMPED = '#fff';
   const MARKER_FILL  = 'hsl(4, 92%, 52%)';
-  const MARKER_RING  = 'hsl(4, 92%, 38%)';
 
   function stampIcon(isStamped, isOptional) {
     const fill = isStamped ? MARKER_FILL : 'white';
@@ -88,7 +87,7 @@
 
 
 
-  function attachStampBtn(popup, stamped, locId, circleEntry, geojsonLayer, updateProgress) {
+  function attachStampBtn(popup, stamped, locId, circleEntry, geojsonLayer, refreshMunis, updateProgress) {
     const btn = popup.getElement().querySelector('.stamp-btn');
     if (!btn) return;
     btn.addEventListener('click', () => {
@@ -104,6 +103,7 @@
       }
       saveStamped(stamped);
       circleEntry.marker.setIcon(stampIcon(stamped.has(String(locId)), circleEntry.optional));
+      refreshMunis();
       if (geojsonLayer) geojsonLayer.resetStyle();
       updateProgress();
     });
@@ -141,8 +141,14 @@
   function addGrain(ctx, W, H) {
     const imageData = ctx.getImageData(0, 0, W, H);
     const data = imageData.data;
-    for (let i = 0; i < data.length; i += 4) {
-      const g = (Math.random() - 0.5) * 28;
+    const pixelCount = W * H;
+    const rnd = new Uint8Array(pixelCount);
+    const chunkSize = 65536;
+    for (let off = 0; off < pixelCount; off += chunkSize) {
+      crypto.getRandomValues(rnd.subarray(off, Math.min(off + chunkSize, pixelCount)));
+    }
+    for (let i = 0, j = 0; i < data.length; i += 4, j++) {
+      const g = (rnd[j] - 128) / 128 * 14;
       data[i]   = Math.max(0, Math.min(255, data[i]   + g));
       data[i+1] = Math.max(0, Math.min(255, data[i+1] + g));
       data[i+2] = Math.max(0, Math.min(255, data[i+2] + g));
@@ -178,9 +184,12 @@
     const transform = makeTransform(getBBox(geoData.features), W, H, 90, 80, 60, 60);
 
     // 自治体ポリゴン
+    const stampedMuniSet = new Set(
+      locations.filter(l => !l.optional && stamped.has(String(l.id))).map(l => l.municipality)
+    );
     geoData.features.forEach(feature => {
       const name = feature.properties.name;
-      const isStamped = locations.some(l => !l.optional && l.municipality === name && stamped.has(String(l.id)));
+      const isStamped = stampedMuniSet.has(name);
       const geom = feature.geometry;
       const polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates;
       ctx.beginPath();
@@ -326,25 +335,20 @@
   ]).then(([{ regions, locations }, geoData, maskData]) => {
     const stamped = loadStamped();
 
-    function isAnyStamped(municipality) {
-      return locations.some(l => !l.optional && l.municipality === municipality && stamped.has(String(l.id)));
-    }
-
-    function stampedMuniCount() {
-      const munis = new Set();
-      for (const loc of locations) {
-        if (!loc.optional && stamped.has(String(loc.id))) munis.add(loc.municipality);
-      }
-      return munis.size;
-    }
-
-    const allMunicipalities = [...new Set(locations.map(l => l.municipality))];
+    const totalMuniCount = new Set(locations.map(l => l.municipality)).size;
+    let stampedMunis = new Set();
     const circleByLocId = {};
     let geojsonLayer = null;
 
+    function refreshStampedMunis() {
+      stampedMunis = new Set(
+        locations.filter(l => !l.optional && stamped.has(String(l.id))).map(l => l.municipality)
+      );
+    }
+
     function updateProgress() {
       document.getElementById('progress').innerHTML =
-        `収集済み: <strong>${stampedMuniCount()}&thinsp;/&thinsp;${allMunicipalities.length} 自治体</strong>`;
+        `収集済み: <strong>${stampedMunis.size}&thinsp;/&thinsp;${totalMuniCount} 自治体</strong>`;
     }
 
     const map = L.map('map', { wheelPxPerZoomLevel: 120, minZoom: 8 }).setView([36.52, 139.0], 9);
@@ -417,7 +421,7 @@
 
     // 自治体境界ポリゴン
     geojsonLayer = L.geoJSON(geoData, {
-      style: feature => polygonStyle(isAnyStamped(feature.properties.name)),
+      style: feature => polygonStyle(stampedMunis.has(feature.properties.name)),
       onEachFeature: (feature, layer) => {
         const name = feature.properties.name;
         layer.bindTooltip(name, {
@@ -451,7 +455,7 @@
       );
       circleByLocId[loc.id] = { marker, optional: loc.optional };
       marker.on('popupopen', () => {
-        attachStampBtn(marker.getPopup(), stamped, loc.id, circleByLocId[loc.id], geojsonLayer, updateProgress);
+        attachStampBtn(marker.getPopup(), stamped, loc.id, circleByLocId[loc.id], geojsonLayer, refreshStampedMunis, updateProgress);
         const copyBtn = marker.getPopup().getElement().querySelector('.copy-btn');
         if (copyBtn) {
           copyBtn.addEventListener('click', () => {
@@ -483,6 +487,7 @@
       Object.values(circleByLocId).forEach(({ marker, optional }) => {
         marker.setIcon(stampIcon(false, optional));
       });
+      refreshStampedMunis();
       if (geojsonLayer) geojsonLayer.resetStyle();
       updateProgress();
     });
@@ -491,6 +496,7 @@
       handleShare(geoData, locations, stamped);
     });
 
+    refreshStampedMunis();
     updateProgress();
   });
 })();
