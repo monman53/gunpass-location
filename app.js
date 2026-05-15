@@ -297,8 +297,8 @@
       const file = new File([blob], 'gunpass.png', { type: 'image/png' });
       const completed = count === total;
       const text = completed
-        ? `GUNMA PASSPORT スタンプラリー ${count}/${total} 自治体コンプリート！ #GUNMAPASSPORT`
-        : `GUNMA PASSPORT スタンプラリー ${count}/${total} 自治体収集中 #GUNMAPASSPORT`;
+        ? `GUNMA PASSPORT スタンプラリー ${count}/${total} 自治体コンプリート！ #GUNMAPASSPORT #群馬パスポート`
+        : `GUNMA PASSPORT スタンプラリー ${count}/${total} 自治体収集中 #GUNMAPASSPORT #群馬パスポート`;
       const shareUrl = 'https://monman53.github.io/gunpass-location/';
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
