@@ -10,12 +10,17 @@
   <meta property="og:url" content="https://monman53.github.io/gunpass-location/">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary">
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-E9ZG1KHTVT"></script>
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-E9ZG1KHTVT');
+    if (location.hostname === 'monman53.github.io') {
+      const s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-E9ZG1KHTVT';
+      document.head.appendChild(s);
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-E9ZG1KHTVT');
+    }
   </script>
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />

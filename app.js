@@ -29,13 +29,13 @@
 
   function stampIcon(isStamped, isOptional) {
     const fill = isStamped ? MARKER_FILL : 'white';
+    const stroke = isStamped ? 'white' : MARKER_FILL;
     const fillOpacity = isStamped ? '0.92' : '0.9';
     const dash = isOptional ? 'stroke-dasharray="4 3"' : '';
-    const d = 'M8.5,15 A7,7,0,1,1,15.5,15 L15.5,22 L22,22 L22,29 L2,29 L2,22 L8.5,22 Z';
+    const d = 'M8.5,15 A7,7,0,1,1,15.5,15 L15.5,22 L22,22 L24,29 L0,29 L2,22 L8.5,22 Z';
     // 丸い持ち手(cx=12,cy=9,r=7)の左右接線点: x=8.5 or 15.5 → y=9+sqrt(49-12.25)≈15
-    const svg = `<svg width="24" height="30" viewBox="0 0 24 30" xmlns="http://www.w3.org/2000/svg">
-      <path d="${d}" fill="none" stroke="white" stroke-width="4" stroke-linejoin="round"/>
-      <path d="${d}" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${MARKER_FILL}" stroke-width="2" stroke-linejoin="round" ${dash}/>
+    const svg = `<svg width="24" height="30" viewBox="0 0 24 30" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 2px rgba(0,0,0,0.3))">
+      <path d="${d}" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${stroke}" stroke-width="1.5" stroke-linejoin="round" ${dash}/>
     </svg>`;
     return L.divIcon({
       html: svg,
@@ -138,6 +138,18 @@
     return (lon, lat) => [cx + (lon - midLon) * cos * scale, cy - (lat - midLat) * scale];
   }
 
+  function addGrain(ctx, W, H) {
+    const imageData = ctx.getImageData(0, 0, W, H);
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
+      const g = (Math.random() - 0.5) * 28;
+      data[i]   = Math.max(0, Math.min(255, data[i]   + g));
+      data[i+1] = Math.max(0, Math.min(255, data[i+1] + g));
+      data[i+2] = Math.max(0, Math.min(255, data[i+2] + g));
+    }
+    ctx.putImageData(imageData, 0, 0);
+  }
+
   function getFeatureCentroid(feature) {
     const geom = feature.geometry;
     let ring;
@@ -186,7 +198,29 @@
       ctx.stroke();
     });
 
-    // 市区町村名ラベル
+    // スタンプアイコン
+    const SCALE = 0.95;
+    const stampPath = new Path2D('M8.5,15 A7,7,0,1,1,15.5,15 L15.5,22 L22,22 L24,29 L0,29 L2,22 L8.5,22 Z');
+    locations.forEach(loc => {
+      const [x, y] = transform(loc.lng, loc.lat);
+      const isStamped = stamped.has(String(loc.id));
+      ctx.save();
+      ctx.translate(x - 12 * SCALE, y - 29 * SCALE);
+      ctx.scale(SCALE, SCALE);
+      ctx.lineJoin = 'round';
+      // 塗り（スタンプ済み=赤、未=白）
+      ctx.fillStyle = isStamped ? MARKER_FILL : 'white';
+      ctx.fill(stampPath);
+      // 枠線（スタンプ済み=白、未=赤）
+      ctx.strokeStyle = isStamped ? 'white' : MARKER_FILL;
+      ctx.lineWidth = 1.8 / SCALE;
+      if (loc.optional) ctx.setLineDash([4, 3]);
+      ctx.stroke(stampPath);
+      ctx.setLineDash([]);
+      ctx.restore();
+    });
+
+    // 市区町村名ラベル（スタンプより手前）
     ctx.font = 'bold 13px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -201,32 +235,6 @@
       ctx.fillText(feature.properties.name, x, y);
     });
 
-    // スタンプアイコン
-    const SCALE = 0.7;
-    const stampPath = new Path2D('M8.5,15 A7,7,0,1,1,15.5,15 L15.5,22 L22,22 L22,29 L2,29 L2,22 L8.5,22 Z');
-    locations.forEach(loc => {
-      const [x, y] = transform(loc.lng, loc.lat);
-      const isStamped = stamped.has(String(loc.id));
-      ctx.save();
-      ctx.translate(x - 12 * SCALE, y - 29 * SCALE);
-      ctx.scale(SCALE, SCALE);
-      ctx.lineJoin = 'round';
-      // 白アウトライン
-      ctx.strokeStyle = 'white';
-      ctx.lineWidth = 5 / SCALE;
-      ctx.stroke(stampPath);
-      // 塗り
-      ctx.fillStyle = isStamped ? MARKER_FILL : 'white';
-      ctx.fill(stampPath);
-      // 枠線（塗りと同色）
-      ctx.strokeStyle = MARKER_FILL;
-      ctx.lineWidth = 2 / SCALE;
-      if (loc.optional) ctx.setLineDash([4, 3]);
-      ctx.stroke(stampPath);
-      ctx.setLineDash([]);
-      ctx.restore();
-    });
-
     // テキスト
     const count = new Set(locations.filter(l => !l.optional && stamped.has(String(l.id))).map(l => l.municipality)).size;
     const total = new Set(locations.filter(l => !l.optional).map(l => l.municipality)).size;
@@ -237,6 +245,9 @@
     ctx.font = 'bold 30px sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText('GUNMA PASSPORT スタンプマップ', 36, 44);
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillStyle = '#777';
+    ctx.fillText('（非公式）', 36, 68);
 
     ctx.font = 'bold 28px sans-serif';
     ctx.fillStyle = completed ? GREEN_RING : '#333';
@@ -250,6 +261,8 @@
     ctx.fillStyle = '#888';
     ctx.textBaseline = 'bottom';
     ctx.fillText('https://monman53.github.io/gunpass-location/', W - 24, H - 16);
+
+    addGrain(ctx, W, H);
 
     return { canvas, count, total };
   }
