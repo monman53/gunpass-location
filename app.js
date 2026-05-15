@@ -1,6 +1,11 @@
 (function () {
   'use strict';
 
+  if (typeof navigator.share !== 'function') {
+    const el = document.getElementById('btn-share-label');
+    if (el) el.textContent = '画像をコピー';
+  }
+
   // v2: location ID ベースに変更（旧: 自治体名ベース）
   const STORAGE_KEY = 'gunpass_stamps_v2';
 
@@ -26,10 +31,11 @@
     const fill = isStamped ? MARKER_FILL : 'white';
     const fillOpacity = isStamped ? '0.92' : '0.9';
     const dash = isOptional ? 'stroke-dasharray="4 3"' : '';
+    const d = 'M8.5,15 A7,7,0,1,1,15.5,15 L15.5,22 L22,22 L22,29 L2,29 L2,22 L8.5,22 Z';
     // 丸い持ち手(cx=12,cy=9,r=7)の左右接線点: x=8.5 or 15.5 → y=9+sqrt(49-12.25)≈15
     const svg = `<svg width="24" height="30" viewBox="0 0 24 30" xmlns="http://www.w3.org/2000/svg">
-      <path d="M8.5,15 A7,7,0,1,1,15.5,15 L15.5,22 L22,22 L22,29 L2,29 L2,22 L8.5,22 Z"
-            fill="${fill}" fill-opacity="${fillOpacity}" stroke="${MARKER_RING}" stroke-width="2" stroke-linejoin="round" ${dash}/>
+      <path d="${d}" fill="none" stroke="white" stroke-width="4" stroke-linejoin="round"/>
+      <path d="${d}" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${MARKER_FILL}" stroke-width="2" stroke-linejoin="round" ${dash}/>
     </svg>`;
     return L.divIcon({
       html: svg,
@@ -103,6 +109,203 @@
     });
   }
 
+  // === Share ===
+
+  function getBBox(features) {
+    let minLon = Infinity, maxLon = -Infinity, minLat = Infinity, maxLat = -Infinity;
+    function visit(c) {
+      if (typeof c[0] === 'number') {
+        if (c[0] < minLon) minLon = c[0];
+        if (c[0] > maxLon) maxLon = c[0];
+        if (c[1] < minLat) minLat = c[1];
+        if (c[1] > maxLat) maxLat = c[1];
+      } else { c.forEach(visit); }
+    }
+    features.forEach(f => visit(f.geometry.coordinates));
+    return { minLon, maxLon, minLat, maxLat };
+  }
+
+  function makeTransform(bbox, W, H, padT, padB, padL, padR) {
+    const { minLon, maxLon, minLat, maxLat } = bbox;
+    const midLat = (minLat + maxLat) / 2;
+    const cos = Math.cos(midLat * Math.PI / 180);
+    const lonSpan = (maxLon - minLon) * cos;
+    const latSpan = maxLat - minLat;
+    const areaW = W - padL - padR, areaH = H - padT - padB;
+    const scale = Math.min(areaW / lonSpan, areaH / latSpan);
+    const midLon = (minLon + maxLon) / 2;
+    const cx = padL + areaW / 2, cy = padT + areaH / 2;
+    return (lon, lat) => [cx + (lon - midLon) * cos * scale, cy - (lat - midLat) * scale];
+  }
+
+  function getFeatureCentroid(feature) {
+    const geom = feature.geometry;
+    let ring;
+    if (geom.type === 'Polygon') {
+      ring = geom.coordinates[0];
+    } else {
+      ring = geom.coordinates[0][0];
+      geom.coordinates.forEach(poly => {
+        if (poly[0].length > ring.length) ring = poly[0];
+      });
+    }
+    const [sumLon, sumLat] = ring.reduce(([a, b], [lon, lat]) => [a + lon, b + lat], [0, 0]);
+    return [sumLon / ring.length, sumLat / ring.length];
+  }
+
+  function generateShareCanvas(geoData, locations, stamped) {
+    const W = 1080, H = 1080;
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#e0e0e0';
+    ctx.fillRect(0, 0, W, H);
+
+    const transform = makeTransform(getBBox(geoData.features), W, H, 90, 80, 60, 60);
+
+    // 自治体ポリゴン
+    geoData.features.forEach(feature => {
+      const name = feature.properties.name;
+      const isStamped = locations.some(l => !l.optional && l.municipality === name && stamped.has(String(l.id)));
+      const geom = feature.geometry;
+      const polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates;
+      ctx.beginPath();
+      polys.forEach(poly => poly.forEach(ring => {
+        ring.forEach(([lon, lat], i) => {
+          const [x, y] = transform(lon, lat);
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        });
+        ctx.closePath();
+      }));
+      ctx.fillStyle = isStamped ? 'hsl(142, 60%, 38%)' : '#f0f0f0';
+      ctx.fill('evenodd');
+      ctx.strokeStyle = GREEN_RING;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    });
+
+    // 市区町村名ラベル
+    ctx.font = 'bold 13px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.lineJoin = 'round';
+    geoData.features.forEach(feature => {
+      const [lon, lat] = getFeatureCentroid(feature);
+      const [x, y] = transform(lon, lat);
+      ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+      ctx.lineWidth = 4;
+      ctx.strokeText(feature.properties.name, x, y);
+      ctx.fillStyle = '#222';
+      ctx.fillText(feature.properties.name, x, y);
+    });
+
+    // スタンプアイコン
+    const SCALE = 0.7;
+    const stampPath = new Path2D('M8.5,15 A7,7,0,1,1,15.5,15 L15.5,22 L22,22 L22,29 L2,29 L2,22 L8.5,22 Z');
+    locations.forEach(loc => {
+      const [x, y] = transform(loc.lng, loc.lat);
+      const isStamped = stamped.has(String(loc.id));
+      ctx.save();
+      ctx.translate(x - 12 * SCALE, y - 29 * SCALE);
+      ctx.scale(SCALE, SCALE);
+      ctx.lineJoin = 'round';
+      // 白アウトライン
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 5 / SCALE;
+      ctx.stroke(stampPath);
+      // 塗り
+      ctx.fillStyle = isStamped ? MARKER_FILL : 'white';
+      ctx.fill(stampPath);
+      // 枠線（塗りと同色）
+      ctx.strokeStyle = MARKER_FILL;
+      ctx.lineWidth = 2 / SCALE;
+      if (loc.optional) ctx.setLineDash([4, 3]);
+      ctx.stroke(stampPath);
+      ctx.setLineDash([]);
+      ctx.restore();
+    });
+
+    // テキスト
+    const count = new Set(locations.filter(l => !l.optional && stamped.has(String(l.id))).map(l => l.municipality)).size;
+    const total = new Set(locations.filter(l => !l.optional).map(l => l.municipality)).size;
+    const completed = count === total;
+
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#111';
+    ctx.font = 'bold 30px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('GUNMA PASSPORT スタンプマップ', 36, 44);
+
+    ctx.font = 'bold 28px sans-serif';
+    ctx.fillStyle = completed ? GREEN_RING : '#333';
+    ctx.textAlign = 'right';
+    ctx.fillText(
+      completed ? `${count}/${total} 自治体コンプリート！` : `${count}/${total} 自治体収集中`,
+      W - 36, 44
+    );
+
+    ctx.font = '16px sans-serif';
+    ctx.fillStyle = '#888';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('https://monman53.github.io/gunpass-location/', W - 24, H - 16);
+
+    return { canvas, count, total };
+  }
+
+  function showToast(msg) {
+    const existing = document.querySelector('.share-toast');
+    if (existing) existing.remove();
+    const el = document.createElement('div');
+    el.className = 'share-toast';
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+  }
+
+  async function handleShare(geoData, locations, stamped) {
+    const btn = document.getElementById('btn-share');
+    btn.disabled = true;
+    const origHTML = btn.innerHTML;
+    btn.textContent = '生成中...';
+    try {
+      const { canvas, count, total } = generateShareCanvas(geoData, locations, stamped);
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      const file = new File([blob], 'gunpass.png', { type: 'image/png' });
+      const completed = count === total;
+      const text = completed
+        ? `GUNMA PASSPORT スタンプラリー ${count}/${total} 自治体コンプリート！ #GUNMAPASSPORT`
+        : `GUNMA PASSPORT スタンプラリー ${count}/${total} 自治体収集中 #GUNMAPASSPORT`;
+      const shareUrl = 'https://monman53.github.io/gunpass-location/';
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], text, url: shareUrl });
+          return;
+        } catch (e) {
+          if (e.name === 'AbortError') return;
+        }
+      }
+
+      // フォールバック: クリップボードにコピー
+      try {
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        showToast('画像をクリップボードにコピーしました。');
+      } catch {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'gunpass.png';
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        showToast('画像をダウンロードしました。');
+      }
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = origHTML;
+    }
+  }
+
   Promise.all([
     fetch('data.json').then(r => r.json()),
     fetch('municipalities.geojson').then(r => r.json()),
@@ -166,20 +369,6 @@
 
     baseLayers['国土地理院 淡色'].addTo(map);
     L.control.layers(baseLayers, null, { position: 'topright', collapsed: true }).addTo(map);
-
-    // GitHub リンク（右上コントロール）
-    const githubControl = L.control({ position: 'topright' });
-    githubControl.onAdd = function () {
-      const el = L.DomUtil.create('a', 'leaflet-control-github');
-      el.href = 'https://github.com/monman53/gunpass-location';
-      el.target = '_blank';
-      el.rel = 'noopener';
-      el.title = 'GitHub';
-      el.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 98 96" width="16" height="16" aria-label="GitHub"><path fill-rule="evenodd" clip-rule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z" fill="currentColor"/></svg>';
-      L.DomEvent.disableClickPropagation(el);
-      return el;
-    };
-    githubControl.addTo(map);
 
     // ポップアップが閉じた直後に別のポップアップが開くのを防ぐ
     let suppressNextPopup = false;
@@ -283,6 +472,10 @@
       });
       if (geojsonLayer) geojsonLayer.resetStyle();
       updateProgress();
+    });
+
+    document.getElementById('btn-share').addEventListener('click', () => {
+      handleShare(geoData, locations, stamped);
     });
 
     updateProgress();
