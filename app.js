@@ -419,6 +419,8 @@
       '行政区域: 「<a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2026.html" target="_blank">国土数値情報（行政区域データ）</a>」（国土交通省）をもとに加工して作成'
     );
 
+    refreshStampedMunis();
+
     // 自治体境界ポリゴン
     geojsonLayer = L.geoJSON(geoData, {
       style: feature => polygonStyle(stampedMunis.has(feature.properties.name)),
@@ -496,7 +498,6 @@
       handleShare(geoData, locations, stamped);
     });
 
-    refreshStampedMunis();
     updateProgress();
   });
 })();
